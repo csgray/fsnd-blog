@@ -1,0 +1,15 @@
+<row>
+  <div class="col-8">
+    {{p.subject}}
+  </div>
+
+  <div class="col-4">
+    {{p.created.strftime("%b %d, %Y")}}
+  </div>
+</row>
+
+<row>
+  <div class="col-12">
+    {{p._render_text | safe}}
+  </div>
+</row>

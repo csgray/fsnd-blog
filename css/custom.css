@@ -1,0 +1,108 @@
+body {
+    margin: 0;
+    font-family: 'Inconsolata', monospace;
+    background-color: grey;
+}
+
+container {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    flex-flow: row wrap;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
+    justify-content: center;
+    background-color: white;
+}
+
+row {
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+.col-1 { width: 8.333%; }
+
+.col-2 { width: 16.667%; }
+
+.col-3 { width: 25%; }
+
+.col-4 { width: 33.333%; }
+
+.col-5 { width: 41.667%; }
+
+.col-6 { width: 50%; }
+
+.col-7 { width: 58.333%; }
+
+.col-8 { width: 66.667%; }
+
+.col-9 { width: 75%; }
+
+.col-10 { width: 83.333%; }
+
+.col-11 { width: 91.667%; }
+
+.col-12 { width: 100%; }
+
+/* Changes for phones */
+@media screen and (max-width: 425px) {
+    .col-4, .col-8 { width: 100%; }
+}
+
+h3 {
+    text-align: center;
+    margin: 5px;
+}
+
+img {
+    width: 100%;
+    object-fit: cover;
+}
+
+p {
+    padding: 10px;
+}
+
+.logo {
+    background-color: black;
+    color: grey;
+    font-family: 'Inconsolata', monospace;
+    width: 100%;
+    padding: 10px;
+}
+
+@-webkit-keyframes blink {
+    from {visibility: visible;}
+    to {visibility: hidden;}
+}
+
+@keyframes blink {
+    from {visibility: visible;}
+    to {visibility: hidden;}
+}
+
+cursor {
+    font-weight: bolder;
+    color: white;
+    -webkit-animation-name: blink;
+    -webkit-animation-timing-function: steps(2,start);
+    -webkit-animation-duration: 1s;
+    -webkit-animation-iteration-count: infinite;
+    animation-name: blink;
+    animation-timing-function: steps(2,start);
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+.project {
+    border: 3px solid grey;
+    border-radius: 5px;
+    box-sizing: border-box;
+    width: 45%;
+    margin: auto;
+    margin-bottom: 20px;
+    background: grey;
+}

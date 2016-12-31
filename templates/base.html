@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inconsolata">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <title>Blog: A FSND Project</title>
+</head>
+
+<body>
+<container>
+    <header class="logo">
+        <row>
+            <h1 class="col-12">csgray.io<cursor>_</cursor></h1>
+        </row>
+        <row>
+            <div class="col-4"><strong>Current Employment:</strong></div>
+            <div class="col-8">SysAdmin at University of Alaska Fairbanks</div>
+        </row>
+        <row>
+            <div class="col-4"><strong>Current Project:</strong></div>
+            <div class="col-8">Full Stack Nanodegree from Udacity</div>
+        </row>
+    </header>
+    <nav>
+        <a class="col-4" href="/">Home</a> |
+        <a class="col-4" href="/blog">Blog</a> |
+        <a class="col-4" href="/blog/newpost">New Post</a>
+    </nav>
+    <row>
+        <hr class="col-12">
+    </row>
+    <br> 
+    {% block content %}
+    {% endblock %}
+</container>
+</body>
+
+</html>
