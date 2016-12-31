@@ -1,1 +1,61 @@
-HELLO!
+{% extends "base.html" %}
+
+{% block content %}
+<row>
+    <picture class="col-12">
+        <source srcset="http://placekitten.com/400/100" media="(max-width: 400px)">
+        <source srcset="http://placekitten.com/800/200" media="(max-width: 800px)">
+        <source srcset="http://placekitten.com/1600/400">
+        <img sizes="100vw" src="http://placekitten.com/800/200" alt="PLACE KITTEN!">
+    </picture>
+</row>
+<br> 
+<row>
+    <p class="col-12">This is only a test. If this was a real webpage, it'd say something else.</p>
+</row>
+<br>
+<row>
+    <h2 class="col-12 logo">def featured_work():</h2>
+</row>
+<row>
+    <div class="col-6 project">
+        <picture>
+            <source srcset="http://placekitten.com/200/200" media="(max-width: 400px)">
+            <source srcset="http://placekitten.com/400/400" media="(max-width: 800px)">
+            <source srcset="http://placekitten.com/800/800">
+            <img sizes="50vw" src="http://placekitten.com/200/200" alt="PLACE KITTEN!">
+        </picture>
+        <h3>Project 1</h3>
+    </div>
+    <div class="col-6 project">
+        <picture>
+            <source srcset="http://placekitten.com/200/200" media="(max-width: 400px)">
+            <source srcset="http://placekitten.com/400/400" media="(max-width: 800px)">
+            <source srcset="http://placekitten.com/800/800">
+            <img sizes="50vw" src="http://placekitten.com/200/200" alt="PLACE KITTEN!">
+        </picture>
+        <h3>Project 2</h3>
+    </div>
+</row>    
+<br>
+<row>
+    <div class="col-6 project">
+        <picture>
+            <source srcset="http://placekitten.com/200/200" media="(max-width: 400px)">
+            <source srcset="http://placekitten.com/400/400" media="(max-width: 800px)">
+            <source srcset="http://placekitten.com/800/800">
+            <img sizes="50vw" src="http://placekitten.com/200/200" alt="PLACE KITTEN!">
+        </picture>
+        <h3>Project 3</h3>
+    </div>
+    <div class="col-6 project">
+        <picture>
+            <source srcset="http://placekitten.com/200/200" media="(max-width: 400px)">
+            <source srcset="http://placekitten.com/400/400" media="(max-width: 800px)">
+            <source srcset="http://placekitten.com/800/800">
+            <img sizes="50vw" src="http://placekitten.com/200/200" alt="PLACE KITTEN!">
+        </picture>
+        <h3>Project 4</h3>
+    </div>
+</row>
+{% endblock %}

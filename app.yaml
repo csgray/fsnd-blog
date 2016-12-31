@@ -1,5 +1,3 @@
-application: fsnd-blog-142400
-version: 1
 runtime: python27
 api_version: 1
 threadsafe: yes
@@ -8,6 +6,9 @@ handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
+
+- url: /css
+  static_dir: css
 
 - url: .*
   script: main.app
