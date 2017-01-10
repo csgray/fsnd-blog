@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <row>
+    <h2 class="col-12">Sign Up</h2>
+  </row>
+
+  <row>
+    <form class="col-12" method="post">
+      <label>
+        <row>
+          <div class="col-12">User</div>
+          <input type="text" class="col-12" name="username" value="{{username}}"><div class="error">{{error_username}}</div>
+        </row>
+      </label>
+
+      <label>
+        <row>
+          <div class="col-12">Password</div>
+          <input type="password" class="col-12" name="password" value=""><div class="error">{{error_password}}</div>
+        </row>
+      </label>
+
+      <label>
+        <row>
+          <div class="col-12">Verify Password</div>
+          <input type="password" class="col-12" name="verify" value=""><div class="error">{{error_verify}}</div>
+        </row>
+      </label>
+
+      <label>
+        <row>
+          <div class="col-12">E-Mail</div>
+          <input type="text" class="col-12" name="email" value="{{email}}"><div class="error">{{error_email}}</div>
+        </row>
+      </label>
+
+      <input type="submit">
+    </form>
+  </row>
+{% endblock %}
