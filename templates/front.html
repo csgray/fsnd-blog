@@ -5,6 +5,17 @@
   {% for p in posts %}
     {{ p.render() | safe }}
     <br>
+    <row>
+  {% if p.created_by == username %}
+    <div class="col-4">Edit | </div>
+    <div class="col-4">Delete</div>
+  {% else %}
+    <div class="col-4">Like | </div>
+    <div class="col-4">Unlike</div>
+  {% endif %}
+    <div class="col-4">Comment</div>
+  </row>
+    <br>
     <br>
   {% endfor %}
 

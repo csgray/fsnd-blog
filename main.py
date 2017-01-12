@@ -110,6 +110,7 @@ class Post(db.Model):
     content = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
     last_modified = db.DateTimeProperty(auto_now=True)
+    created_by = db.StringProperty(required=True)
 
     def render(self):
         self._render_text = self.content.replace("\n", "<br>")
@@ -133,9 +134,9 @@ class User(db.Model):
     def register(cls, name, pw, email=None):
         pw_hash = make_pw_hash(name, pw)
         return cls(parent=users_key(),
-                    name=name,
-                    pw_hash=pw_hash,
-                    email=email)
+                   name=name,
+                   pw_hash=pw_hash,
+                   email=email)
 
     @classmethod
     def login(cls, name, pw):
@@ -164,14 +165,17 @@ class MainPage(Handler):
 class FrontPage(Handler):
     def get(self):
         posts = db.GqlQuery("select * from Post order by created desc")
-        self.render("front.html", posts=posts)
+        username = None
+        if self.user:
+            username = self.user.name
+        self.render("front.html", posts=posts, username=username)
 
 class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         post = db.get(key)
 
-        # TODO: Make a better 404 template!
+
         if not post:
             self.error(404)
             return
@@ -185,9 +189,10 @@ class NewPost(Handler):
     def post(self):
         subject = self.request.get("subject")
         content = self.request.get("content")
+        created_by = self.user.name
 
         if subject and content:
-            p = Post(parent=blog_key(), subject=subject, content=content)
+            p = Post(parent=blog_key(), subject=subject, content=content, created_by=created_by)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
