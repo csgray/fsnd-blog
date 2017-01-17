@@ -7,13 +7,10 @@
     <br>
     <row>
   {% if p.created_by == username %}
-    <div class="col-4">Edit | </div>
-    <div class="col-4">Delete</div>
-  {% else %}
-    <div class="col-4">Like | </div>
-    <div class="col-4">Unlike</div>
+    <a href="/blog/{{p.key().id()}}/edit" class="col-4">Edit</a>
+    <a href="/blog/{{p.key().id()}}/delete" class="col-4">Delete</a>
   {% endif %}
-    <div class="col-4">Comment</div>
+    <a href="/blog/{{p.key().id()}}/comment" class="col-4">Comment</a>
   </row>
     <br>
     <br>
