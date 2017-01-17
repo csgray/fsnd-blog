@@ -175,7 +175,6 @@ class PostPage(Handler):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         post = db.get(key)
 
-
         if not post:
             self.error(404)
             return
@@ -274,6 +273,73 @@ class Welcome(Handler):
         else:
             self.redirect('/blog/signup')
 
+class Edit(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+
+        self.render("edit.html", post=post)
+    
+    def post(self):
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        if self.user:
+            username = self.user.name 
+
+        if self.post.created_by == username:
+            if subject and content:
+                p = Post(parent=blog_key(), subject=subject, content=content, created_by=username)
+                p.put()
+                self.redirect("/blog/%s" % str(p.key().id()))
+            else:
+                error = "Blog posts need both a subject and content."
+                self.render("newpost.html", subject=subject, content=content, error=error)
+        
+        else:
+            error = "You do not have permission to edit this post."
+            self.render("edit.html", post=self.post)
+
+class Delete(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+
+        self.render("delete.html", post=post)
+    
+    def post(self, post_id):
+        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+        p = db.get(key)
+
+        if self.user:
+            username = self.user.name
+
+        if p.created_by == username:
+            p.delete()
+            self.redirect("/blog/")
+        
+        else:
+            error = "You do not have permission to delete this post."
+            self.render("delete.html", post=p, error=error)
+
+class Comment(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+
+        self.render("comment.html", post=post)
+
 # Page handlers
 app = webapp2.WSGIApplication([("/", MainPage),
                                ("/blog/?", FrontPage),
@@ -282,5 +348,8 @@ app = webapp2.WSGIApplication([("/", MainPage),
                                ("/blog/signup", SignUp),
                                ("/blog/welcome", Welcome),
                                ("/blog/login", Login),
-                               ("/blog/logout", Logout)
+                               ("/blog/logout", Logout),
+                               ("/blog/([0-9]+)/edit", Edit),
+                               ("/blog/([0-9]+)/delete", Delete),
+                               ("/blog/([0-9]+)/comment", Comment),
                               ], debug=True)

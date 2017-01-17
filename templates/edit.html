@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <row>
+    <h2 class="col-12">Edit Post</h2>
+  </row>
+
+  <row>
+    <form class="col-12" method="post">
+      <label>
+        <row>
+          <div class="col-12">Subject</div>
+          <input type="text" class="col-12" name="subject" value="{{subject}}" autofocus>
+        </row>
+      </label>
+
+      <label>
+        <row>
+          <div class="col-12">Content</div>
+          <textarea class="col-12" name="content" rows="10">{{content}}</textarea>
+        </row>
+      </label>
+
+      <div class="error">{{error}}</div>
+
+      <input type="submit">
+    </form>
+  </row>
+{% endblock %}
