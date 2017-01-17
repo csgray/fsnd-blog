@@ -282,26 +282,30 @@ class Edit(Handler):
             self.error(404)
             return
 
-        self.render("edit.html", post=post)
+        self.render("edit.html", post=post, subject = post.subject, content = post.content)
     
-    def post(self):
+    def post(self, post_id):
         subject = self.request.get("subject")
         content = self.request.get("content")
+        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+        p = db.get(key)
+
         if self.user:
             username = self.user.name 
 
-        if self.post.created_by == username:
+        if p.created_by == username:
             if subject and content:
-                p = Post(parent=blog_key(), subject=subject, content=content, created_by=username)
+                p.subject = self.request.get("subject")
+                p.content = self.request.get("content")
                 p.put()
-                self.redirect("/blog/%s" % str(p.key().id()))
+                self.redirect("/blog/%s" % post_id)
             else:
                 error = "Blog posts need both a subject and content."
                 self.render("newpost.html", subject=subject, content=content, error=error)
         
         else:
             error = "You do not have permission to edit this post."
-            self.render("edit.html", post=self.post)
+            self.render("edit.html", post=p, error=error)
 
 class Delete(Handler):
     def get(self, post_id):
