@@ -105,19 +105,6 @@ def blog_key(name="testing"):
     return db.Key.from_path("blogs", name)
 
 # Database Objects
-class Post(db.Model):
-    subject = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
-    created_by = db.StringProperty(required=True)
-    likes = db.IntegerProperty(default=0)
-    liked_by = db.StringListProperty(default=None)
-
-    def render(self):
-        self._render_text = self.content.replace("\n", "<br>")
-        return render_string("post.html", p=self)
-
 class User(db.Model):
     name = db.StringProperty(required=True)
     pw_hash = db.StringProperty(required=True)
@@ -145,6 +132,33 @@ class User(db.Model):
         u = cls.by_name(name)
         if u and valid_pw(name, pw, u.pw_hash):
             return u
+
+class Post(db.Model):
+    subject = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
+    created_by = db.StringProperty(required=True)
+    likes = db.IntegerProperty(default=0)
+    liked_by = db.StringListProperty(default=None)
+
+    def render(self):
+        self._render_text = self.content.replace("\n", "<br>")
+        return render_string("post.html", p=self)
+
+class Comment(db.Model):
+    subject = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
+    created_by = db.StringProperty(required=True)
+    likes = db.IntegerProperty(default=0)
+    liked_by = db.StringListProperty(default=None)
+    parent_post = db.IntegerProperty(required=True)
+
+    def render(self):
+        self._render_text = self.content.replace("\n", "<br>")
+        return render_string("post.html", p=self)
 
 # Signup verification functions
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -176,12 +190,35 @@ class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         post = db.get(key)
+        comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = {}".format(post_id))
+        #username = None
+
+        if self.user:
+            username = self.user.name
 
         if not post:
             self.error(404)
             return
 
-        self.render("permalink.html", post=post)
+        self.render("permalink.html", post=post, comments=comments, username=username)
+
+    def post(self, post_id):
+        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+        post = db.get(key)
+        comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = {}".format(post_id))
+
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        created_by = self.user.name
+
+        if subject and content:
+            new_comment = Comment(parent=blog_key(), subject=subject, content=content, created_by=created_by, parent_post=post.key().id())
+            new_comment.put()
+            self.redirect("/blog/%s" % post_id)
+
+        else:
+            error = "Comments need both a subject and content."
+            self.render("permalink.html", post=post, comments=comments, subject=subject, content=content, error=error)
 
 class NewPost(Handler):
     def get(self):
@@ -334,17 +371,6 @@ class Delete(Handler):
         else:
             error = "You do not have permission to delete this post."
             self.render("delete.html", post=p, error=error)
-
-class Comment(Handler):
-    def get(self, post_id):
-        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
-        post = db.get(key)
-
-        if not post:
-            self.error(404)
-            return
-
-        self.render("comment.html", post=post)
 
 class Like(Handler):
     def get(self, post_id):

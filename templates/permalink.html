@@ -2,4 +2,73 @@
 
 {% block content %}
   {{post.render() | safe}}
+
+  {% for c in comments %}
+  <row>
+    <div class="col-8">
+      {{c.subject}}
+    </div>
+
+    <div class="col-4">
+      {{c.created.strftime("%b %d, %Y")}}
+    </div>
+  </row>
+  <row>
+    <div class="col-12">
+      {{c.content.replace("\n", "<br>") | safe}}
+    </div>
+  </row>
+  <row>
+    <div class="col-4">Created by: {{c.created_by}}</div>
+    <div class="col-4">Likes: {{c.likes}}
+
+  {% if username != c.created_by %}
+
+    {% if username not in c.liked_by %}
+      <a href="/blog/{{c.key().id()}}/like" class="col-4">Like</a>
+    {% else %}
+      <a href="/blog/{{c.key().id()}}/dislike" class="col-4">Dislike</a>
+    {% endif %}
+
+  {% endif %}
+
+    </div>
+  </row>
+    <br>
+    <row>
+  {% if c.created_by == username %}
+    <a href="/blog/{{c.key().id()}}/edit" class="col-4">Edit</a>
+    <a href="/blog/{{c.key().id()}}/delete" class="col-4">Delete</a>
+  {% endif %}
+  </row>
+    <br>
+    <br>
+  {% endfor %}
+
+  <row>
+    <h2 class="col-12">New Comment</h2>
+  </row>
+
+  <row>
+    <form class="col-12" method="post">
+      <label>
+        <row>
+          <div class="col-12">Subject</div>
+          <input type="text" class="col-12" name="subject" value="{{subject}}">
+        </row>
+      </label>
+
+      <label>
+        <row>
+          <div class="col-12">Content</div>
+          <textarea class="col-12" name="content" rows="10">{{content}}</textarea>
+        </row>
+      </label>
+
+      <div class="error">{{error}}</div>
+
+      <input type="submit">
+    </form>
+  </row>
+
 {% endblock %}

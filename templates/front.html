@@ -4,9 +4,7 @@
 
   {% for p in posts %}
   <row>
-    <div class="col-8">
-      {{p.subject}}
-    </div>
+    <a href="/blog/{{p.key().id()}}" class="col-8">{{p.subject}}</a>
 
     <div class="col-4">
       {{p.created.strftime("%b %d, %Y")}}
@@ -39,7 +37,6 @@
     <a href="/blog/{{p.key().id()}}/edit" class="col-4">Edit</a>
     <a href="/blog/{{p.key().id()}}/delete" class="col-4">Delete</a>
   {% endif %}
-    <a href="/blog/{{p.key().id()}}/comment" class="col-4">Comment</a>
   </row>
     <br>
     <br>
