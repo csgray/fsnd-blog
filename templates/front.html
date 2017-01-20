@@ -3,7 +3,36 @@
 {% block content %}
 
   {% for p in posts %}
-    {{ p.render() | safe }}
+  <row>
+    <div class="col-8">
+      {{p.subject}}
+    </div>
+
+    <div class="col-4">
+      {{p.created.strftime("%b %d, %Y")}}
+    </div>
+  </row>
+  <row>
+    <div class="col-12">
+      {{p.content.replace("\n", "<br>") | safe}}
+    </div>
+  </row>
+  <row>
+    <div class="col-4">Created by: {{p.created_by}}</div>
+    <div class="col-4">Likes: {{p.likes}}
+
+  {% if username != p.created_by %}
+
+    {% if username not in p.liked_by %}
+      <a href="/blog/{{p.key().id()}}/like" class="col-4">Like</a>
+    {% else %}
+      <a href="/blog/{{p.key().id()}}/dislike" class="col-4">Dislike</a>
+    {% endif %}
+
+  {% endif %}
+
+    </div>
+  </row>
     <br>
     <row>
   {% if p.created_by == username %}

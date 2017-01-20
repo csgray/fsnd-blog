@@ -17,18 +17,22 @@
 </row>
 
 <row>
-  <div class="col-6">Created by: {{p.created_by}}</div>
-  <div class="col-6">Likes: {{p.likes}}
+  <div class="col-4">Created by: {{p.created_by}}</div>
+  <div class="col-4">Likes: {{p.likes}}
 
 {% if p.created_by != username %}
 
   {% if username not in p.liked_by %}
-    <input type="submit" name="like" value="Like"> 
+    <a href="/blog/{{p.key().id()}}/like" class="col-4">Like</a> 
   {% else %}
-    <input type="submit" name="dislike" value="Dislike"> 
+    <a href="/blog/{{p.key().id()}}/dislike" class="col-4">Dislike</a>
   {% endif %}
 
 {% endif %}
 
   </div>
 </row>
+
+Debugging: <br>
+p.created_by = {{p.created_by}} <br>
+username = {{username}}

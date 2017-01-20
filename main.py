@@ -172,33 +172,6 @@ class FrontPage(Handler):
             username = self.user.name
         self.render("front.html", posts=posts, username=username)
 
-    def post(self, post_id):
-        key = db.Key.from_path("Post", int(post_id), parent=blog_key())
-        p = db.get(key)
-
-        if self.user:
-            username = self.user.name
-
-        if not self.user:
-            error = "You must be logged in to like/dislike a post."
-            self.redirect("/blog/")
-
-        if p.created_by == username:
-            error = "You may not like/dislike your own posts."
-            self.redirect("/blog/")
-
-        elif 'like' in self.POST:
-            p.likes += 1
-            p.liked_by += username
-            p.put()
-            self.redirect("/blog/")
-        
-        elif 'dislike' in self.POST:
-            p.likes -= 1
-            p.liked_by.remove(username)
-            p.put()
-            self.redirect("/blog/")
-
 class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
@@ -374,7 +347,7 @@ class Comment(Handler):
         self.render("comment.html", post=post)
 
 class Like(Handler):
-    def post(self, post_id):
+    def get(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         p = db.get(key)
 
@@ -391,11 +364,12 @@ class Like(Handler):
 
         else:
             p.likes += 1
+            p.liked_by.append(username)
             p.put()
             self.redirect("/blog/")
 
-class Unlike(Handler):
-    def post(self, post_id):
+class Dislike(Handler):
+    def get(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         p = db.get(key)
 
@@ -412,6 +386,7 @@ class Unlike(Handler):
 
         else:
             p.likes -= 1
+            p.liked_by.remove(username)
             p.put()
             self.redirect("/blog/")
 
@@ -428,5 +403,5 @@ app = webapp2.WSGIApplication([("/", MainPage),
                                ("/blog/([0-9]+)/delete", Delete),
                                ("/blog/([0-9]+)/comment", Comment),
                                ("/blog/([0-9]+)/like", Like),
-                               ("/blog/([0-9]+)/unlike", Unlike),
+                               ("/blog/([0-9]+)/dislike", Dislike),
                               ], debug=True)
