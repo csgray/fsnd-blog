@@ -2,9 +2,15 @@
 
 {% block content %}
 
+  {% if error %}
+    <row>
+      <div class="col-12">{{error}}</div>
+    </row>
+  {% endif %}
+
   {% for p in posts %}
   <row>
-    <a href="/blog/{{p.key().id()}}" class="col-8">{{p.subject}}</a>
+    <h2 class="col-8"><a href="/blog/{{p.key().id()}}">{{p.subject}}</a></h2>
 
     <div class="col-4">
       {{p.created.strftime("%b %d, %Y")}}

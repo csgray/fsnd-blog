@@ -142,9 +142,9 @@ class Post(db.Model):
     likes = db.IntegerProperty(default=0)
     liked_by = db.StringListProperty(default=None)
 
-    def render(self):
+    def render(self, username=None):
         self._render_text = self.content.replace("\n", "<br>")
-        return render_string("post.html", p=self)
+        return render_string("post.html", p=self, username=username)
 
 class Comment(db.Model):
     subject = db.StringProperty(required=True)
@@ -156,9 +156,9 @@ class Comment(db.Model):
     liked_by = db.StringListProperty(default=None)
     parent_post = db.IntegerProperty(required=True)
 
-    def render(self):
+    def render(self, username=None):
         self._render_text = self.content.replace("\n", "<br>")
-        return render_string("post.html", p=self)
+        return render_string("post.html", p=self, username=username)
 
 # Signup verification functions
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -182,8 +182,10 @@ class FrontPage(Handler):
     def get(self):
         posts = db.GqlQuery("select * from Post order by created desc")
         username = None
+
         if self.user:
             username = self.user.name
+
         self.render("front.html", posts=posts, username=username)
 
 class PostPage(Handler):
@@ -191,16 +193,31 @@ class PostPage(Handler):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         post = db.get(key)
         comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = {}".format(post_id))
-        #username = None
+        username = None
+
+        # Rendering Comments posts
+        if not post:
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            post = db.get(key)
+            comments = None
+            
+            if not post:
+                self.error(404)
+                return
+            
+            if self.user:
+                username = self.user.name
+                self.render("permalink.html", post=post, username=username)
+            
+            else:
+                self.render("permalink.html", post=post)
 
         if self.user:
             username = self.user.name
-
-        if not post:
-            self.error(404)
-            return
-
-        self.render("permalink.html", post=post, comments=comments, username=username)
+            self.render("permalink.html", post=post, comments=comments, username=username)
+        
+        else:
+            self.render("permalink.html", post=post, comments=comments)
 
     def post(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
@@ -209,12 +226,16 @@ class PostPage(Handler):
 
         subject = self.request.get("subject")
         content = self.request.get("content")
-        created_by = self.user.name
 
-        if subject and content:
+        if subject and content and self.user:
+            created_by = self.user.name
             new_comment = Comment(parent=blog_key(), subject=subject, content=content, created_by=created_by, parent_post=post.key().id())
             new_comment.put()
             self.redirect("/blog/%s" % post_id)
+
+        if not self.user:
+            error = "You must be logged in to comment."
+            self.render("permalink.html", post=post, comments=comments, subject=subject, content=content, error=error)
 
         else:
             error = "Comments need both a subject and content."
@@ -318,16 +339,24 @@ class Edit(Handler):
         post = db.get(key)
 
         if not post:
-            self.error(404)
-            return
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            post = db.get(key)
 
-        self.render("edit.html", post=post, subject = post.subject, content = post.content)
+            if not post:
+                self.error(404)
+                return
+        
+        self.render("edit.html", post=post, subject=post.subject, content=post.content)
     
     def post(self, post_id):
         subject = self.request.get("subject")
         content = self.request.get("content")
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         p = db.get(key)
+
+        if not p:
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            p = db.get(key)
 
         if self.user:
             username = self.user.name 
@@ -352,14 +381,22 @@ class Delete(Handler):
         post = db.get(key)
 
         if not post:
-            self.error(404)
-            return
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            post = db.get(key)
+
+            if not post:
+                self.error(404)
+                return
 
         self.render("delete.html", post=post)
     
     def post(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         p = db.get(key)
+
+        if not p:
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            p = db.get(key)
 
         if self.user:
             username = self.user.name
@@ -377,16 +414,27 @@ class Like(Handler):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         p = db.get(key)
 
+        if not p:
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            p = db.get(key)
+
         if self.user:
             username = self.user.name
 
+            if p.created_by == username:
+                error = "You may not like your own posts."
+                posts=db.GqlQuery("select * from Post order by created desc")
+                self.render("front.html", posts=posts, username=username, error=error)
+
         if not self.user:
             error = "You must be logged in to like a post."
-            self.redirect("/blog/")
+            posts=db.GqlQuery("select * from Post order by created desc")
+            username=None
 
-        if p.created_by == username:
-            error = "You may not like your own posts."
-            self.redirect("/blog/")
+            if self.user:
+                username=self.user.name
+
+            self.render("front.html", posts=posts, username=username, error=error)
 
         else:
             p.likes += 1
@@ -399,16 +447,27 @@ class Dislike(Handler):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         p = db.get(key)
 
+        if not p:
+            key = db.Key.from_path("Comment", int(post_id), parent=blog_key())
+            p = db.get(key)
+
         if self.user:
             username = self.user.name
 
-        if not self.user:
-            error = "You must be logged in to unlike a post."
-            self.redirect("/blog/")
+            if p.created_by == username:
+                error = "You may not dislike your own posts."
+                posts=db.GqlQuery("select * from Post order by created desc")
+                self.render("front.html", posts=posts, username=username, error = error)
 
-        if p.created_by == username:
-            error = "You may not unlike your own posts."
-            self.redirect("/blog/")
+        if not self.user:
+            error = "You must be logged in to dislike a post."
+            posts=db.GqlQuery("select * from Post order by created desc")
+            username=None
+
+            if self.user:
+                username=self.user.name
+
+            self.render("front.html", posts=posts, username=username, error = error)
 
         else:
             p.likes -= 1
@@ -427,7 +486,7 @@ app = webapp2.WSGIApplication([("/", MainPage),
                                ("/blog/logout", Logout),
                                ("/blog/([0-9]+)/edit", Edit),
                                ("/blog/([0-9]+)/delete", Delete),
-                               ("/blog/([0-9]+)/comment", Comment),
                                ("/blog/([0-9]+)/like", Like),
                                ("/blog/([0-9]+)/dislike", Dislike),
+                               ("/blog/([0-9]+)/comment", Comment),
                               ], debug=True)
